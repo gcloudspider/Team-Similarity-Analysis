@@ -1,32 +1,59 @@
 基于聚类分析的球队风格比较
 ========================================================
-## By Casper
+## Writen by Casper
 
 *Just for fun*
 
+## 1. Introduction
 
+
+## 2. Obtain Data
+
+## 3. Clean the Data
 导入相关package,读取csv数据
 
 ```r
 library(ggplot2)
 library(grid)
+library(knitr)
 euro <- read.csv("euro.csv")
 ```
 
-剔除NA行
+首先看一下Data frame的结构,显示euro的前五列数据。
 
 ```r
-euro <- subset(euro, goal!="NA")
+kable(head(euro), format = "markdown")
 ```
 
+```
+## 
+## 
+## |team               | goal| goal_for| pass| center| shot| in_door| steal| corner_kick| free_kick| off_side| foul| red| yellow| possession|
+## |:------------------|----:|--------:|----:|------:|----:|-------:|-----:|-----------:|---------:|--------:|----:|---:|------:|----------:|
+## |Atlético de Madrid |    2|        3|  558|     46|   18|       5|    18|           8|        11|        2|   15|   0|      4|       59.0|
+## |Atlético de Madrid |    1|        0|  288|     28|    8|       2|    28|           4|        26|        3|   21|   0|      2|       36.2|
+## |Atlético de Madrid |    5|        0|  486|     39|   28|      10|    20|          11|        14|        5|   10|   0|      1|       57.4|
+## |Atlético de Madrid |    2|        0|  361|     23|    9|       3|    23|           5|        16|        5|   16|   0|      5|       44.4|
+## |Atlético de Madrid |    4|        0|  547|     42|   17|       6|    22|           7|        16|        3|   12|   0|      2|       58.4|
+## |Atlético de Madrid |    0|        0|  280|     12|    6|       3|    13|           3|        14|        0|   15|   0|      2|       28.7|
+```
+
+数据表显示的是每一场比赛的数据，我们需要转变为场均数据。
 
 ```r
+# 可以看到其中有三行是无数据的，将其排除（因为计算平均值，因此排除NA行不会对结果造成太大影响）
+euro <- subset(euro, goal!="NA")
+
+# 计算出每支队伍的场均数据
 euro1 <- aggregate(euro[,-1], list(euro$team), mean)
+
+# 为了接下来的cluster分析，删除数据表中的非numeric数据，将Team标示作为row.names
 rownames(euro1) <- euro1[,1]
 euro2 <- euro1[,-1]
 ```
 
-计算所有队伍的数据平均值，以及每队的数据相对值
+做聚类分析之前，先要考虑一个问题。球队的进球、射门数数量级是不同的，比赛进球4个助攻的难度，远远高于射门4次的难度。因此如果不将衡量指标归一化，聚类就会不公平，射门次数(传球次数)就会变成主要的指标，而进球数就会变成次要的指标，控球率(百分比)在其中所占的份额就更加小，会导致聚类结果的偏差。从实际上来看，控球率以及进球数是球队进攻风格最重要的体现，因此将各种指标保持在同一个量级是非常重要的。为了解决这个问题，可以先计算所有队伍的数据平均值，再根据每队的数据与平均值的比例，得到每队的相对值。
+
 
 ```r
 mean_data <- colMeans(euro2)
@@ -36,26 +63,44 @@ for (i in 1:nrow(euro2)){
 }
 ```
 
-聚类分析，Cluster的K值确定
+## 4. Data Analysis
+### 1. 分类算法
+聚类分析的算法大体可以分为以下几种[1][2]:
+- **划分聚类(partitioning methods)**：将包含n个对象的数据划分为k(k<=n)个聚类，给定k，即要构建的划分的数目，划分方法首先创建一个初始划分。然后采用一种迭代的重定位技术，尝试通过对象在划分间移动来改进划分,从而让在同一个类中的对象之间的距离尽可能小，而不同类中的对象之间的距离尽可能大。
+- **层次聚类(hierarchical methods)**：一开始将所有的对象置于一个簇中。在迭代的每一步中，一个簇被分裂为更小的簇，直到最终每个对象在单独的一个簇中，或者达到一个终止条件。
+- **基于模型的方法(model-based methods)**：基于模型的方法为每个簇假定了一个模型，寻找数据对给定模型的最佳匹配。一个基于模型的算法可能通过构建反映数据点空间分布的密度函数来定位聚类。它也基于标准的统计数字自动决定聚类的数目，考虑“噪音”数据和孤立点，从而产生健壮的聚类方法。
 
-确定K means Cluster值
+在此分析中，我们只考虑风格相似性，不关心球队实力等级比较，而且此分析属于非监督学习，并没有training数据，因此采用了划分聚类中常用的K-means算法。
 
-accumulator for cost results
-run kmeans for all clusters up to 7
-Run kmeans for each level of i, allowing up to 100 iterations for convergence
-Combine cluster number and cost together, write to df
+![kmeans](Algorithm_kmeans.png)
+
+K-means算法的流程分为六步[3]：
+
+1. 确定K值(cluster的个数)
+2. 随机挑选cluster的中心位置
+3. 对于每个数据找出相距最近的中心
+4. 每个中心1找到此中心相应的点所构成的中心2
+5. 将中心1转变为中心2
+6. 不断重复4-5步
+
+![k-means](k-means.jpg)
+
+### 2. K值确定
+那么我们首先要确定需要将球队分为几类，按照K-means算法的定义，1<=K<=n，但是当K=n时无法满足任务需求，因此K的取值区间为[1,n-1]。与其随机选择K值再通过分析分类结果，我们计算了当K取各个值的cost value(sum of squares)[4]，并对K值和cost绘图分析。
+
 
 ```r
-cost_df <- data.frame()
+cost <- data.frame()
 
 for(i in 1:(nrow(euro2)-1)){
     kmeans<- kmeans(euro2, centers = i)
-    cost_df<- rbind(cost_df, cbind(i, kmeans$tot.withinss))
+    cost <- rbind(cost, cbind(i, kmeans$tot.withinss))
 }
-names(cost_df) <- c("cluster", "cost")
+names(cost) <- c("cluster", "cost")
 ```
 
-Plot
+通过"elbow method"选择K值[5]。下图是Cluster和Cost的绘图结果，可以看出，K=3是一个breakpoint，当我们增加或者减少K值时，cost function的斜率都会增加。因此，将cluster定为3会取得不错的分类结果。
+
 
 ```r
 ggplot(data=cost_df, aes(x=cluster, y=cost, group=1)) + 
@@ -66,26 +111,28 @@ ggplot(data=cost_df, aes(x=cluster, y=cost, group=1)) +
     ylab("Within-Cluster Sum of Squares\n")
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
 
-从上图可以看出，K = 3是个不错的选择
+### 3. K-means聚类分析
+以K=3，对球队比赛数据做K-means聚类分析
 
 ```r
 cluster <- kmeans(euro2, 3)
 
 euro3 <- cbind(euro1[,1], euro2)
 colnames(euro3[1]) <- "team"
-
+    
 euro4 <- cbind(1:8, euro2)
 ```
 
+对K-means结果绘图，因为参数较多，分为前半部分(goal, goal_for, pass, center, shot, in_door, steal)和后半部分(corner_kick, free_kick, off_side, foul, red, yellow, possession)
 
 ```r
 plot(euro4[,2:8], pch = cluster$cluster, col = euro4[,1], 
      main = "Plot of Team Data by Cluster 1")
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
 
 
 ```r
@@ -93,12 +140,13 @@ plot(euro4[,9:15], pch = cluster$cluster, col = euro4[,1],
      main = "Plot of Team Data by Cluster 2")
 ```
 
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
 
-
+### 4. 分析子类
 根据“进攻”、“防守”、对比赛的”掌控“和”风格“再进行分析
 
 ```r
+# 把cluster的分类结果添加到euro4的data frame里面
 euro4$cluster <- factor(cluster$cluster)
 
 grid.newpage()
@@ -119,4 +167,14 @@ print(plot3, vp = vplayout(2, 1))
 print(plot4, vp = vplayout(2, 2))
 ```
 
-![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
+
+## 5. Result
+
+
+## Reference
+1. Machine Learning in Action, Peter Harrington
+2. http://blog.csdn.net/yaoyepeng/article/details/6281991
+3. Unsupervised learning or Clustering, Carlos Guestrin 
+4. http://randyzwitch.com/rsitecatalyst-k-means-clustering/
+5. http://en.wikipedia.org/wiki/Determining_the_number_of_clusters_in_a_data_set
