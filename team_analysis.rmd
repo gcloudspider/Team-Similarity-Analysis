@@ -103,7 +103,7 @@ colnames(euro3[1]) <- "team"
 euro4 <- cbind(1:8, euro2)
 ```
 
-对K-means结果绘图，因为参数较多，将两部分分开绘图，前半部分("goal", "goal_for", "pass"", "center", "shot", "in_door", "steal")，后半部分("corner_kick", "free_kick", "off_side", "foul", "red", "yellow", "possession")
+对K-means结果绘图，因为参数较多，将两部分分开绘图，前半部分("goal", "goal_for", "pass"", "center", "shot", "in_door", "steal")，后半部分("corner_kick", "free_kick", "off_side", "foul", "red", "yellow", "possession")。图中同样的形状表示处于相同的cluster，颜色(颜色编号1-8)表示不同的队伍。
 
 ```{r}
 plot(euro4[,2:8], pch = cluster$cluster, col = euro4[,1], 
@@ -115,8 +115,19 @@ plot(euro4[,9:15], pch = cluster$cluster, col = euro4[,1],
      main = "Plot of Team Data by Cluster 2")
 ```
 
+可以看出相同的类别的点(同种形状)在大多参数下相似度都是非常高的，那么整体的分类结果是怎么样的呢？
+```{r}
+cluster
+```
+
+
 ### 4. 分析子类
-根据“进攻”、“防守”、对比赛的”掌控“和”风格“再进行分析
+有了总体的分类结果，还可以对其中的某些column做进一步的分析，以检验其某类型的风格。此分析将球队比赛风格分成了四个角度，进攻、防守、掌控以及方式。
+- 进攻：选取了"shot"和"goal"两个直观的指标；
+- 防守：选取了"foul"和"steal"两个指标，"steal"体现了球队的防守效率，"foul"体现防守的凶悍程度；
+- 掌控：选取了"pass"和"possession"两栏数据，传球("pass")和控球率("possession")都很能体现球队对比赛的场控；
+- 方式：选取了"center"和"off_side"，越位("off_side")可以在一定程度上说明球队的直传数，对比传中数("center")，能够体现球队的进攻组织方式。
+
 ```{r}
 # 把cluster的分类结果添加到euro4的data frame里面
 euro4$cluster <- factor(cluster$cluster)

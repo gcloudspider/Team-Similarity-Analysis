@@ -125,7 +125,7 @@ colnames(euro3[1]) <- "team"
 euro4 <- cbind(1:8, euro2)
 ```
 
-对K-means结果绘图，因为参数较多，将两部分分开绘图，前半部分("goal", "goal_for", "pass"", "center", "shot", "in_door", "steal")，后半部分("corner_kick", "free_kick", "off_side", "foul", "red", "yellow", "possession")
+对K-means结果绘图，因为参数较多，将两部分分开绘图，前半部分("goal", "goal_for", "pass"", "center", "shot", "in_door", "steal")，后半部分("corner_kick", "free_kick", "off_side", "foul", "red", "yellow", "possession")。图中同样的形状表示处于相同的cluster，颜色(颜色编号1-8)表示不同的队伍。
 
 
 ```r
@@ -143,8 +143,52 @@ plot(euro4[,9:15], pch = cluster$cluster, col = euro4[,1],
 
 ![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
 
+可以看出相同的类别的点(同种形状)在大多参数下相似度都是非常高的，那么整体的分类结果是怎么样的呢？
+
+```r
+cluster
+```
+
+```
+## K-means clustering with 3 clusters of sizes 3, 3, 2
+## 
+## Cluster means:
+##     goal goal_for   pass center   shot in_door  steal corner_kick
+## 1 1.1062   1.3897 1.1789 0.8339 1.0024  1.0128 0.8533      0.9180
+## 2 1.1160   0.9014 1.0221 0.9835 1.1507  1.2461 1.1061      1.1309
+## 3 0.6667   0.5634 0.6984 1.2740 0.7703  0.6117 1.0608      0.9266
+##   free_kick off_side   foul   red yellow possession
+## 1    0.8583   0.7778 0.8944 2.667 0.7469     1.0950
+## 2    0.9357   1.1296 0.9259 0.000 0.8714     1.0333
+## 3    1.3090   1.1389 1.2695 0.000 1.5725     0.8075
+## 
+## Clustering vector:
+##            Arsenal Atlético de Madrid          Barcelona 
+##                  1                  3                  1 
+##            Chelsea  FC Bayern München           FC Porto 
+##                  2                  1                  2 
+##             Monaco        Real Madrid 
+##                  3                  2 
+## 
+## Within cluster sum of squares by cluster:
+## [1] 1.5127 1.2958 0.8096
+##  (between_SS / total_SS =  82.9 %)
+## 
+## Available components:
+## 
+## [1] "cluster"      "centers"      "totss"        "withinss"    
+## [5] "tot.withinss" "betweenss"    "size"         "iter"        
+## [9] "ifault"
+```
+
+
 ### 4. 分析子类
-根据“进攻”、“防守”、对比赛的”掌控“和”风格“再进行分析
+有了总体的分类结果，还可以对其中的某些column做进一步的分析，以检验其某类型的风格。此分析将球队比赛风格分成了四个角度，进攻、防守、掌控以及方式。
+- 进攻：选取了"shot"和"goal"两个直观的指标；
+- 防守：选取了"foul"和"steal"两个指标，"steal"体现了球队的防守效率，"foul"体现防守的凶悍程度；
+- 掌控：选取了"pass"和"possession"两栏数据，传球("pass")和控球率("possession")都很能体现球队对比赛的场控；
+- 方式：选取了"center"和"off_side"，越位("off_side")可以在一定程度上说明球队的直传数，对比传中数("center")，能够体现球队的进攻组织方式
+
 
 ```r
 # 把cluster的分类结果添加到euro4的data frame里面
@@ -168,7 +212,7 @@ print(plot3, vp = vplayout(2, 1))
 print(plot4, vp = vplayout(2, 2))
 ```
 
-![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11.png) 
 
 ## 5. Result
 
