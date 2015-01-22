@@ -8,10 +8,9 @@
 
 
 ## 2. Obtain Data
-获取数据是此分析中最耗时间的一环，无论是门户网站还是专业的体育网站都没有上面描述的那些详尽数据。而如OPTA此类专业体育统计机构的数据不对一般用户开放，可以想象博彩公司基于这些详尽数据，在精算师分析下产生的赔率设计肯定是有利于庄家的。幸好本文分析球队风格数据只是针对最近的几场小组赛(欧冠6轮，亚洲杯3轮)，而每场比赛以后会有本场比赛的数据，因此可以手动收集将这些数据建立成数据表。欧冠的数据来自[腾讯体育][1]，亚洲杯的数据来自于[网易体育][2]和[搜达足球网][3]。下图为三个数据来源的统计类型重叠部分。因此，我们重新构建数据表，选取了重叠的8个统计类型："team", "goal", "goal_for", "pass", "center", "shot", "in_door", "steal", "corner_kick", "free_kick", "off_side", "foul", "red", "yellow", "possession"。
-[1]:http://soccerdata.sports.qq.com/live.htm?mid=782698
-[2]:http://sports.163.com/15/0114/22/AFV30B6G00051C8M.html
-[3]:http://www.sodasoccer.com/dasai/league/result_statistics.jsp?mid=77E07E01DC4E6CF0
+获取数据是此分析中最耗时间的一环，无论是门户网站还是专业的体育网站都没有上面描述的那些详尽数据。而如OPTA此类专业体育统计机构的数据不对一般用户开放，可以想象博彩公司基于这些详尽数据，在精算师分析下产生的赔率设计肯定是有利于庄家的。幸好本文分析球队风格数据只是针对最近的几场小组赛(欧冠6轮，亚洲杯3轮)，而每场比赛以后会有本场比赛的数据，因此可以手动收集将这些数据建立成数据表。
+
+欧冠的数据来自[腾讯体育](http://soccerdata.sports.qq.com/live.htm?mid=782698)，亚洲杯的数据来自于[网易体育](http://sports.163.com/15/0114/22/AFV30B6G00051C8M.html)和[搜达足球网](http://www.sodasoccer.com/dasai/league/result_statistics.jsp?mid=77E07E01DC4E6CF0)。下图为三个数据来源的统计类型重叠部分。因此，我们重新构建数据表，选取了重叠的8个统计类型："team", "goal", "goal_for", "pass", "center", "shot", "in_door", "steal", "corner_kick", "free_kick", "off_side", "foul", "red", "yellow", "possession"。
 
 ## 3. Clean the Data
 导入相关package,读取csv数据
@@ -154,28 +153,28 @@ cluster
 ```
 
 ```
-## K-means clustering with 3 clusters of sizes 3, 2, 3
+## K-means clustering with 3 clusters of sizes 2, 3, 3
 ## 
 ## Cluster means:
 ##     goal goal_for   pass center   shot in_door  steal corner_kick
-## 1 1.1062   1.3897 1.1789 0.8339 1.0024  1.0128 0.8533      0.9180
-## 2 0.6667   0.5634 0.6984 1.2740 0.7703  0.6117 1.0608      0.9266
-## 3 1.1160   0.9014 1.0221 0.9835 1.1507  1.2461 1.1061      1.1309
+## 1 0.6667   0.5634 0.6984 1.2740 0.7703  0.6117 1.0608      0.9266
+## 2 1.1160   0.9014 1.0221 0.9835 1.1507  1.2461 1.1061      1.1309
+## 3 1.1062   1.3897 1.1789 0.8339 1.0024  1.0128 0.8533      0.9180
 ##   free_kick off_side   foul   red yellow possession
-## 1    0.8583   0.7778 0.8944 2.667 0.7469     1.0950
-## 2    1.3090   1.1389 1.2695 0.000 1.5725     0.8075
-## 3    0.9357   1.1296 0.9259 0.000 0.8714     1.0333
+## 1    1.3090   1.1389 1.2695 0.000 1.5725     0.8075
+## 2    0.9357   1.1296 0.9259 0.000 0.8714     1.0333
+## 3    0.8583   0.7778 0.8944 2.667 0.7469     1.0950
 ## 
 ## Clustering vector:
 ##            Arsenal Atlético de Madrid          Barcelona 
-##                  1                  2                  1 
-##            Chelsea  FC Bayern München           FC Porto 
 ##                  3                  1                  3 
+##            Chelsea  FC Bayern München           FC Porto 
+##                  2                  3                  2 
 ##             Monaco        Real Madrid 
-##                  2                  3 
+##                  1                  2 
 ## 
 ## Within cluster sum of squares by cluster:
-## [1] 1.5127 0.8096 1.2958
+## [1] 0.8096 1.2958 1.5127
 ##  (between_SS / total_SS =  82.9 %)
 ## 
 ## Available components:
