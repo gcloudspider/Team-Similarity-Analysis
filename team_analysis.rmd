@@ -8,6 +8,10 @@
 
 
 ## 2. Obtain Data
+获取数据是此分析中最耗时间的一环，无论是门户网站还是专业的体育网站都没有上面描述的那些详尽数据。而如OPTA此类专业体育统计机构的数据不对一般用户开放，可以想象博彩公司基于这些详尽数据，在精算师分析下产生的赔率设计肯定是有利于庄家的。幸好本文分析球队风格数据只是针对最近的几场小组赛(欧冠6轮，亚洲杯3轮)，而每场比赛以后会有本场比赛的数据，因此可以手动收集将这些数据建立成数据表。欧冠的数据来自[腾讯体育][1]，亚洲杯的数据来自于[网易体育][2]和[搜达足球网][3]。下图为三个数据来源的统计类型重叠部分。因此，我们重新构建数据表，选取了重叠的8个统计类型："team", "goal", "goal_for", "pass", "center", "shot", "in_door", "steal", "corner_kick", "free_kick", "off_side", "foul", "red", "yellow", "possession"。
+[1]:http://soccerdata.sports.qq.com/live.htm?mid=782698
+[2]:http://sports.163.com/15/0114/22/AFV30B6G00051C8M.html
+[3]:http://www.sodasoccer.com/dasai/league/result_statistics.jsp?mid=77E07E01DC4E6CF0
 
 ## 3. Clean the Data
 导入相关package,读取csv数据
