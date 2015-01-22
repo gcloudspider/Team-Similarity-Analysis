@@ -84,7 +84,7 @@ names(cost) <- c("cluster", "cost")
 通过"elbow method"选择K值[5]。下图是Cluster和Cost的绘图结果，可以看出，K=3是一个breakpoint，当我们增加或者减少K值时，cost function的斜率都会增加。因此，将cluster定为3会取得不错的分类结果。
 
 ```{r}
-ggplot(data=cost_df, aes(x=cluster, y=cost, group=1)) + 
+ggplot(data=cost, aes(x=cluster, y=cost, group=1)) + 
     theme_gray() + 
     geom_line(colour = "darkgreen") +
     ggtitle("Reduction In Cost For Values of 'k'\n") +
@@ -103,7 +103,8 @@ colnames(euro3[1]) <- "team"
 euro4 <- cbind(1:8, euro2)
 ```
 
-对K-means结果绘图，因为参数较多，分为前半部分(goal, goal_for, pass, center, shot, in_door, steal)和后半部分(corner_kick, free_kick, off_side, foul, red, yellow, possession)
+对K-means结果绘图，因为参数较多，将两部分分开绘图，前半部分("goal", "goal_for", "pass"", "center", "shot", "in_door", "steal")，后半部分("corner_kick", "free_kick", "off_side", "foul", "red", "yellow", "possession")
+
 ```{r}
 plot(euro4[,2:8], pch = cluster$cluster, col = euro4[,1], 
      main = "Plot of Team Data by Cluster 1")

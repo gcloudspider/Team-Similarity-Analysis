@@ -103,7 +103,7 @@ names(cost) <- c("cluster", "cost")
 
 
 ```r
-ggplot(data=cost_df, aes(x=cluster, y=cost, group=1)) + 
+ggplot(data=cost, aes(x=cluster, y=cost, group=1)) + 
     theme_gray() + 
     geom_line(colour = "darkgreen") +
     ggtitle("Reduction In Cost For Values of 'k'\n") +
@@ -111,9 +111,7 @@ ggplot(data=cost_df, aes(x=cluster, y=cost, group=1)) +
     ylab("Within-Cluster Sum of Squares\n")
 ```
 
-```
-## Error: object 'cost_df' not found
-```
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
 
 ### 3. K-means聚类分析
 以K=3，对球队比赛数据做K-means聚类分析
@@ -127,7 +125,8 @@ colnames(euro3[1]) <- "team"
 euro4 <- cbind(1:8, euro2)
 ```
 
-对K-means结果绘图，因为参数较多，分为前半部分(goal, goal_for, pass, center, shot, in_door, steal)和后半部分(corner_kick, free_kick, off_side, foul, red, yellow, possession)
+对K-means结果绘图，因为参数较多，将两部分分开绘图，前半部分("goal", "goal_for", "pass"", "center", "shot", "in_door", "steal")，后半部分("corner_kick", "free_kick", "off_side", "foul", "red", "yellow", "possession")
+
 
 ```r
 plot(euro4[,2:8], pch = cluster$cluster, col = euro4[,1], 
