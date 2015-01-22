@@ -111,7 +111,9 @@ ggplot(data=cost_df, aes(x=cluster, y=cost, group=1)) +
     ylab("Within-Cluster Sum of Squares\n")
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
+```
+## Error: object 'cost_df' not found
+```
 
 ### 3. K-means聚类分析
 以K=3，对球队比赛数据做K-means聚类分析
